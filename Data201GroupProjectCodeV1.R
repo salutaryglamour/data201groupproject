@@ -1,18 +1,18 @@
 library(tidyverse)
 library(dplyr)
 
-#df imports 
-unemployment_df <- read.csv('unemployment.csv')
-health_df <- read.csv('health.csv')
-land_df <- read.csv('land.csv')
-water_df <- read.csv('water.csv')
-internet_df <-read.csv('internet.csv')
-crime_df <- read.csv('crime.csv')
-energy_df <- read.csv('energy.csv')
-GDP_df <- read.csv('GDP.csv')
-education_df <- read.csv('education.csv')
-pop_growth_df <- read.csv('population growth urban.csv')
-pop_density_df <- read.csv('population density.csv')
+# List of all dataset names
+dataset_names <- c("unemployment.csv", "health.csv", "land.csv", "water.csv", "internet.csv", "crime.csv", "energy.csv", "GDP.csv", "education.csv", "population growth urban.csv", "population density.csv")
+datasets_dir <- "../Datasets/" #directory one step up from base directory
+
+#Itteratively load csvs into the environment and save them with the df_ prefix
+for (filename in dataset_names) {
+  df_name <- tools::file_path_sans_ext(basename(filename))  # Get dataframe name without file extension
+  df_name <- paste0("df_", df_name)  # Add the "df_" prefix
+  file_path <- file.path("Datasets", filename)  # Specify the relative path to the file
+  assign(df_name, read.csv(file_path)) #load dataset using constructed filepath and df_name
+}
+
 
 #format columns 
 names_unemployment = c('AreaCode', 'Unemployment', 'Year', 'Series', 'Value', 'Footnotes', 'Source')
