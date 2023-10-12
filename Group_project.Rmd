@@ -1,0 +1,297 @@
+---
+title: "Group_project_submit"
+output: pdf_document
+date: "2023-10-06"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(gganimate)
+```
+
+
+# Importing Data from UN website
+```{r importing}
+
+# Data importing using read_csv 
+unemployment_df <- read.csv('unemployment.csv')
+health_df <- read.csv('health.csv')
+land_df <- read.csv('land.csv')
+water_df <- read.csv('water.csv')
+internet_df <-read.csv('internet.csv')
+crime_df <- read.csv('crime.csv')
+energy_df <- read.csv('energy.csv')
+GDP_df <- read.csv('GDP.csv')
+education_df <- read.csv('education.csv')
+pop_growth_df <- read.csv('population growth urban.csv')
+pop_density_df <- read.csv('population density.csv')
+
+```
+
+
+
+
+
+# Wrangling data to clean variable names, dropping first row of error headers, convert numeric columns to numeric etc
+```{r wrangling}
+
+# Initializing variables
+# Countries vector to be referenced when all countries are to be needed
+countries <- c("United States of America", "China", "Russian Federation", "India", "Australia", "United Kingdom", "Nigeria", "Germany", "Brazil", "Japan", "United Arab Emirates", "New Zealand")
+
+# Years of interest for the data
+years <- c(2000, 2005, 2010, 2015, 2018, 2019, 2020)
+
+
+# Renaming columns - Can do with lapply now
+# Renaming columns using vector of column names and colnames() function
+names_unemployment = c('AreaCode', 'Country', 'Year', 'Series', 'Value', 'Footnotes', 'Source')
+colnames(unemployment_df) <- names_unemployment
+glimpse(unemployment_df)
+
+# Health data
+names_health = c('AreaCode', 'Country', 'Year', 'Series', 'Value', 'Footnotes', 'Source')
+colnames(health_df) <- names_health
+glimpse(health_df)
+
+# Land data
+names_land = c('AreaCode', 'Country', 'Year', 'Series', 'Value', 'Footnotes', 'Source')
+colnames(land_df) <- names_land 
+glimpse(land_df)
+
+# Water Data
+names_water = c('AreaCode', 'Country', 'Year', 'Series', 'Value', 'Footnotes', 'Source')
+colnames(water_df) <- names_water 
+glimpse(water_df)
+
+# Crime data
+names_crime = c('AreaCode', 'Country', 'Year', 'Series', 'Value', 'Footnotes', 'Source')
+colnames(crime_df) <- names_crime
+glimpse(crime_df)
+
+# Energy data
+names_energy = c('AreaCode', 'Country', 'Year', 'Series', 'Value', 'Footnotes', 'Source')
+colnames(energy_df) <- names_energy 
+glimpse(energy_df)
+
+# GDP data
+names_GDP = c('AreaCode', 'Country', 'Year', 'Series', 'Value', 'Footnotes', 'Source')
+colnames(GDP_df) <- names_GDP
+glimpse(GDP_df)
+
+# Education data
+names_education = c('AreaCode', 'Country', 'Year', 'Series', 'Value', 'Footnotes', 'Source')
+colnames(education_df) <- names_education 
+glimpse(education_df)
+
+# Population growth data
+names_pop_growth = c('AreaCode', 'Country', 'Year', 'Series', 'CapitalCity', 'CapitalCityFootnotes', 'Value', 'Footnotes', 'Source')
+colnames(pop_growth_df) <- names_pop_growth 
+glimpse(pop_growth_df)
+
+# Population density data
+names_pop_density = c('AreaCode', 'Country', 'Year', 'Series', 'Value', 'Footnotes', 'Source')
+colnames(pop_density_df) <- names_pop_density 
+glimpse(pop_density_df)
+
+# Internet data
+names_internet = c('AreaCode', 'Country', 'Year', 'Series', 'Value', 'Footnotes', 'Source')
+colnames(internet_df) <- names_internet 
+glimpse(internet_df)
+
+
+# Dataframes combined into a list to be referenced below
+df_list <- list(unemployment_df, health_df, land_df, water_df, crime_df, energy_df, GDP_df, education_df, pop_growth_df, pop_density_df, internet_df)
+
+select_vector <- c("Country", "Year", "Series", "Value")
+
+# Binding together the rows and then using select with all_of the select vector to retain the columns of interest  that are listed in the select vector.  
+df_list_subset2<- df_list %>% 
+  bind_rows() %>% 
+  select(all_of(select_vector))
+
+
+# Dropping the first row that has the mislabelled/missing column names.
+df_list_subset2 <- df_list_subset2 %>% 
+  filter(Series != "Series")
+head(df_list_subset)
+
+
+# Converting year and value to numeric from character using mutate
+df_list_subset2 <- df_list_subset2 %>% 
+  mutate(
+    Year = as.numeric(Year), 
+    Value = as.numeric(Value)
+         )
+  
+
+# Filtering for the countries we want in the countries vector
+df_list_filtered_countries2 <- df_list_subset2 %>% 
+  filter(Country %in% countries)
+
+
+# filter vector to be used below to keep only the observations in df_list_filtered that are the series of interest.
+series_filter_vector <- c('Unemployment rate - Female', 'Labour force participation - Female', 'Unemployment rate - Male', 'Labour force participation - Male', 'Unemployment rate - Total', 'Labour force participation - Total', 'Current health expenditure (% of GDP)', 'Domestic general government health expenditure (% of total government expenditure)', 'Safely managed drinking water sources, total (Proportion of population with access)', 'Safely managed sanitation facilities, urban (Proportion of population with access)', 'Safely managed sanitation facilities, rural (Proportion of population with access)',  'Theft at the national level, rate per 100,000 population', 'Intentional homicide rates per 100,000', 'Assault rate per 100,000 population', 'Primary energy production (petajoules)', 'Net imports [Imports - Exports - Bunkers] (petajoules)', 'Total supply (petajoules)', 'GDP in constant 2010 prices (millions of US dollars)', 'GDP per capita (US dollars)', 'GDP real rates of growth (percent)',  'Public expenditure on education (% of GDP)',  'Urban population (percent)', 'Urban population (percent growth rate per annum)', 'Population mid-year estimates (millions)', 'Population density', 'Percentage of individuals using the internet' )
+
+
+
+# Filtering df_list_filtered_countries for the series variables we want, using the vector of filter names
+df_list_filtered_series2 <- df_list_filtered_countries2 %>% 
+  filter(Series %in% series_filter_vector)
+
+# Creating above frame into a wide format.
+# Trying to turn frame to wide from long, using pivot_wider. Makes values go missing though.
+df_list_filtered_series_wide2 <- df_list_filtered_series2 %>% 
+  pivot_wider(names_from = Series, values_from = Value)
+
+
+
+### Finsihed here so far
+
+
+
+```
+
+
+
+
+# Visualization
+
+```{r visualization}
+
+# Using the df_list_filtered_series2 dataset to take filters of subset data and plot using ggplot.
+# Plots below
+
+
+# Using filter of series == population density to plot population density vs year by country.
+df_list_filtered_series2 %>%
+  filter(Series == "Population density") %>% 
+  ggplot(aes(x = Year, y = Value, colour = Country)) +
+  geom_point() +
+  geom_line() +
+  labs(
+    title = "Population Density for the years 2010 - 2020",
+    x = "Year", 
+    y = "Population Density (People per square KM)"
+  ) 
+
+
+# Filtering and plot
+df_list_filtered_series2 %>% 
+  filter(column == variable_name) %>% 
+  ggplot(aes(x = , y = , colour = )) +
+  geom_point() +
+  labs()
+
+
+# Filtering and plot
+df_list_filtered_series2 %>% 
+  filter(column == variable_name) %>% 
+  ggplot(aes(x = , y = , colour = )) +
+  geom_point() +
+  labs()
+
+
+# Filtering and plot
+df_list_filtered_series2 %>% 
+  filter(column == variable_name) %>% 
+  ggplot(aes(x = , y = , colour = )) +
+  geom_point() +
+  labs()
+
+
+
+# Filtering and plot
+
+
+
+# Filtering and plot
+
+
+```
+
+
+
+
+```{r }
+
+```
+
+
+
+```{r testing}
+
+# Testing why pivot isnt working using just new zealand data
+nz_filtered_series <- df_list_filtered_series %>% 
+  filter(Country == "New Zealand")
+
+
+nz_filtered_series_wide <- nz_filtered_series %>% 
+  pivot_wider(names_from = Series, values_from = Value)
+
+
+nz_filtered_series %>% 
+  filter(Series == "Population density") %>% 
+  ggplot(aes(x = Year, y = Value)) +
+  geom_point() +
+  labs()
+
+
+nz_filtered_series_wide %>% ggplot(aes(x = Year, y = `Population density`)) +
+  geom_point() +
+  labs()
+
+
+df_group_by_test <- df_list_filtered_series %>% 
+  group_by(Series)
+
+# Testing plotting using long frame and group_by
+graph_test_df <- df_list_filtered_series %>% 
+  filter(Series == "Population density") %>% 
+  ggplot(aes(x = Year, y = Value)) + 
+  geom_point(colour = Country) +
+  labs()
+
+
+
+# Using internet_merging_data to 
+df_list_filtered_series %>%
+  filter(Series == "Population density") %>% 
+  ggplot(aes(x = Year, y = Value, colour = Country)) +
+  geom_point() +
+  geom_line() +
+  labs(
+    title = "Population Density for the years ",
+    x = "Year", 
+    y = "Population Density (People per square KM)"
+  ) 
+
+
+
+
+
+
+# Testing if pivot isnt working using just new zealand data
+nz_filtered_series <- df_list_filtered_series %>% 
+  filter(Country == "New Zealand")
+
+
+nz_filtered_series_wide <- nz_filtered_series %>% 
+  pivot_wider(names_from = Series, values_from = Value)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
