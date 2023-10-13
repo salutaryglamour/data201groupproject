@@ -44,6 +44,15 @@ countries <- c("United States of America", "China", "Russian Federation", "India
 # Years of interest for the data
 years <- c(2000, 2005, 2010, 2015, 2018, 2019, 2020)
 
+# Vector of column names called names_columns
+names_columns = c('AreaCode', 'Country', 'Year', 'Series', 'Value', 'Footnotes', 'Source')
+# Assign colnames(dataframe) <- names_columns
+# For all dataframes eg unemployment_df etc
+
+
+# Join all frames together in wide format after swapping series values to the column name in value
+
+
 
 # Renaming columns - Can do with lapply now
 # Renaming columns using vector of column names and colnames() function
@@ -116,7 +125,7 @@ df_list_subset2<- df_list %>%
 # Dropping the first row that has the mislabelled/missing column names.
 df_list_subset2 <- df_list_subset2 %>% 
   filter(Series != "Series")
-head(df_list_subset)
+head(df_list_subset2)
 
 
 # Converting year and value to numeric from character using mutate
@@ -206,9 +215,36 @@ df_list_filtered_series_wide2 %>%
   aes(x = 'GDP per capita (US dollars)', y = `Unemployment rate - Total`)
   ) +
   geom_point() +
-  facet_wrap(~Country) +
+#  facet_wrap(~Country) +
   transition_time(Year)+
   labs(title = "Year: {frame_time}")
+
+
+
+
+
+
+# Example of animated scatterpoint plot with lines moving by day
+
+p <- ggplot(
+  airquality,
+  aes(Day, Temp, group = Month, color = factor(Month))
+  ) +
+  geom_line() +
+  scale_color_viridis_d() +
+  labs(x = "Day of Month", y = "Temperature") +
+  theme(legend.position = "top")
+p
+
+# Animation
+p + transition_reveal(Day)
+
+
+df_list_filtered_series_wide2 %>% 
+  ggplot(
+    aes(x = , y = ) + 
+    geom_line()
+  )
 
 
 
@@ -260,7 +296,35 @@ df_list_filtered_series2 %>%
 
 
 
-```{r }
+```{r other_people_code}
+
+# Filter the dataframe for the participation rate column
+df_filtered <- df_list_filtered_series_wide2 %>%
+  filter(!is.na(`Labour force participation - Total`))
+
+# Create a scatterplot with color coding for years
+ggplot(df_filtered, aes(x = Year, y = `Labour force participation - Total`, color = as.factor(Country))) +
+  geom_point() +
+  geom_line() +
+  labs(x = "Country", y = "Labour force participation - Total (%)",
+       title = "Labour Force Participation Rate by Country (Color-coded by Year)") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +  # Rotate x-axis labels for readability
+  scale_color_discrete(name = "Year")
+
+
+# Filter dataset
+df_filtered <- df_list_filtered_series_wide2 %>%
+  filter(!is.na(`Current health expenditure (% of GDP)`))
+
+# Create a scatterplot with facets and color
+ggplot(df_filtered, aes(x = Year, y = `Current health expenditure (% of GDP)`, color = Country)) +
+  geom_point() +
+  facet_wrap(~Country, scales = "free_y") +
+  labs(x = "Year", y = "Current Health Expenditure (% of GDP)",
+       title = "Current Health Expenditure by Country and Year") +
+  theme(legend.position = "none")
+
+
 
 ```
 
